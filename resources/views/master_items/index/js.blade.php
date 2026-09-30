@@ -11,7 +11,13 @@
     $(document).ready(function() {
         $('#table').DataTable({
             searching: false,
-            order: [[0, 'desc']],
+            order: [
+                [0, 'desc']
+            ],
+            columnDefs: [{
+                orderable: false,
+                targets: [1, 7]
+            }],
         });
         getData()
     });
@@ -20,8 +26,8 @@
         getData()
     })
 
-    function getData(){
-        
+    function getData() {
+
         $('#loading-filter').show();
         var dataTableObj = $('#table').DataTable();
         var filter_kode = $('#filter-kode').val()
@@ -31,32 +37,38 @@
         dataTableObj.clear().draw();
 
         $.ajax({
-            url: '{{url("master-items/search")}}',
+            url: '{{ url('master-items/search') }}',
             dataType: 'json',
             tryCount: 0,
             retryLimit: 3,
-            data: 'kode=' + filter_kode + '&nama=' + filter_nama + '&hargamin=' + filter_harga_min + '&hargamax=' + filter_harga_max,
+            data: 'kode=' + filter_kode + '&nama=' + filter_nama + '&hargamin=' + filter_harga_min +
+                '&hargamax=' + filter_harga_max,
             success: function(results) {
                 var data = results.data
 
                 $.each(data, function(index, item) {
-                    array_temp = [];
                     var harga_jual = item.harga_beli + item.harga_beli * item.laba / 100;
-                    harga_jual = Math.round(harga_jual)
+                    harga_jual = Math.round(harga_jual);
                     var kode = item.kode;
 
-                    var html = `<a href="{{url('master-items/view/')}}/` + kode + `" class="btn btn-primary">View</a>`
+                    var foto = item.foto ?
+                        `<img src="{{ asset('storage') }}/` + item.foto +
+                        `" width="50" class="img-thumbnail">` :
+                        '-';
 
-                    $.each(item, function(obj_name, obj_value) {
-                        if (obj_name == 'laba') return false;
-                        array_temp.push(obj_value)
-                    })
-                    array_temp.push(harga_jual)
-                    array_temp.push(item.supplier)
-                    array_temp.push(html)
+                    var html = `<a href="{{ url('master-items/view/') }}/` + kode +
+                        `" class="btn btn-primary">View</a>`;
 
-
-                    dataTableObj.row.add(array_temp).draw(true);
+                    dataTableObj.row.add([
+                        kode,
+                        foto,
+                        item.nama,
+                        item.jenis,
+                        item.harga_beli,
+                        harga_jual,
+                        item.supplier,
+                        html
+                    ]).draw(true);
                 });
                 $('#loading-filter').hide();
             },
@@ -73,4 +85,18 @@
             }
         })
     }
+
+    document.getElementById('foto').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        const allowed = ['image/jpeg', 'image/png'];
+        if (!allowed.includes(file.type)) {
+            alert('Foto harus berformat JPG atau PNG.');
+            this.value = '';
+        } else if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran foto maksimal 2 MB.');
+            this.value = '';
+        }
+    });
 </script>
