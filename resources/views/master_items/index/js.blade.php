@@ -8,6 +8,17 @@
     var data_per_fetch = 500;
     var data_fetched = 0;
 
+    var formatRupiah = new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+    });
+
+    function renderRupiah(data, type) {
+        // format hanya saat ditampilkan; sorting tetap memakai angka asli
+        return type === 'display' ? formatRupiah.format(data) : data;
+    }
+
     $(document).ready(function() {
         $('#table').DataTable({
             searching: false,
@@ -15,9 +26,15 @@
                 [0, 'desc']
             ],
             columnDefs: [{
-                orderable: false,
-                targets: [1, 4, 8]
-            }],
+                    orderable: false,
+                    targets: [1, 4, 8]
+                },
+                {
+                    targets: [5, 6],
+                    render: renderRupiah,
+                    className: 'text-end'
+                }
+            ],
         });
         getData()
     });

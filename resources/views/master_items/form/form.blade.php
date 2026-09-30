@@ -14,12 +14,22 @@
 
     <div class="form-group">
         <label>Harga Beli</label>
-        <input type="number" class="form-control" name="harga_beli" required value="{{ $item->harga_beli ?? '' }}">
+        <input type="text" inputmode="numeric" class="form-control" id="harga_beli_display" placeholder="Rp 0"
+            autocomplete="off" required>
+        {{-- nilai asli (angka) yang dikirim ke server --}}
+        <input type="hidden" name="harga_beli" id="harga_beli"
+            value="{{ old('harga_beli', $item->harga_beli ?? '') }}">
     </div>
 
     <div class="form-group">
         <label>Laba (dalam persen)</label>
-        <input type="number" class="form-control" name="laba" required value="{{ $item->laba ?? '' }}">
+        <input type="number" min="0" class="form-control" name="laba" id="laba" required
+            value="{{ old('laba', $item->laba ?? '') }}">
+    </div>
+
+    <div class="alert alert-info py-2 mt-3">
+        Preview Harga Jual: <strong id="preview_harga_jual">Rp 0</strong>
+        <small class="d-block text-muted">Harga Beli + (Harga Beli x Laba / 100)</small>
     </div>
 
     @php $selected = $item->supplier ?? ''; @endphp
@@ -112,4 +122,36 @@
             this.value = '';
         }
     });
+
+    (function() {
+        const display = document.getElementById('harga_beli_display');
+        const hidden = document.getElementById('harga_beli');
+        const laba = document.getElementById('laba');
+        const preview = document.getElementById('preview_harga_jual');
+        const nf = new Intl.NumberFormat('id-ID');
+
+        function rupiah(n) {
+            return 'Rp ' + nf.format(n);
+        }
+
+        function updatePreview() {
+            const beli = parseInt(hidden.value) || 0;
+            const persen = parseFloat(laba.value) || 0;
+            preview.textContent = rupiah(Math.round(beli + beli * persen / 100));
+        }
+
+        // saat mengetik: ambil angkanya saja, simpan ke hidden, tampilkan berformat
+        display.addEventListener('input', function() {
+            const digits = this.value.replace(/\D/g, '');
+            hidden.value = digits;
+            this.value = digits ? rupiah(parseInt(digits)) : '';
+            updatePreview();
+        });
+
+        laba.addEventListener('input', updatePreview);
+
+        // saat halaman dibuka (mode edit atau setelah gagal validasi)
+        if (hidden.value) display.value = rupiah(parseInt(hidden.value));
+        updatePreview();
+    })();
 </script>
