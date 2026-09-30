@@ -27,13 +27,8 @@
     })
 
     function getData() {
-
         $('#loading-filter').show();
         var dataTableObj = $('#table').DataTable();
-        var filter_kode = $('#filter-kode').val()
-        var filter_nama = $('#filter-nama').val()
-        var filter_harga_min = $('#filter-harga-min').val()
-        var filter_harga_max = $('#filter-harga-max').val()
         dataTableObj.clear().draw();
 
         $.ajax({
@@ -41,14 +36,18 @@
             dataType: 'json',
             tryCount: 0,
             retryLimit: 3,
-            data: 'kode=' + filter_kode + '&nama=' + filter_nama + '&hargamin=' + filter_harga_min +
-                '&hargamax=' + filter_harga_max,
+            data: {
+                kode: $('#filter-kode').val(),
+                nama: $('#filter-nama').val(),
+                hargamin: $('#filter-harga-min').val(),
+                hargamax: $('#filter-harga-max').val()
+            },
             success: function(results) {
-                var data = results.data
+                var rows = [];
 
-                $.each(data, function(index, item) {
-                    var harga_jual = item.harga_beli + item.harga_beli * item.laba / 100;
-                    harga_jual = Math.round(harga_jual);
+                $.each(results.data, function(index, item) {
+                    var harga_jual = Math.round(item.harga_beli + item.harga_beli * item.laba /
+                    100);
                     var kode = item.kode;
 
                     var foto = item.foto ?
@@ -59,7 +58,7 @@
                     var html = `<a href="{{ url('master-items/view/') }}/` + kode +
                         `" class="btn btn-primary">View</a>`;
 
-                    dataTableObj.row.add([
+                    rows.push([
                         kode,
                         foto,
                         item.nama,
@@ -68,22 +67,23 @@
                         harga_jual,
                         item.supplier,
                         html
-                    ]).draw(true);
+                    ]);
                 });
+
+                // tambahkan semua baris sekaligus, draw hanya sekali
+                dataTableObj.rows.add(rows).draw();
                 $('#loading-filter').hide();
             },
-            error: function(xhr, textStatus, errorThrown) {
+            error: function() {
                 this.tryCount++;
                 if (this.tryCount <= this.retryLimit) {
                     $.ajax(this);
                     return;
                 }
-                alert('Terjadi kesalahan server, tidak dapat mengambil data')
+                alert('Terjadi kesalahan server, tidak dapat mengambil data');
                 $('#loading-filter').hide();
-
-                return;
             }
-        })
+        });
     }
 
     document.getElementById('foto').addEventListener('change', function() {

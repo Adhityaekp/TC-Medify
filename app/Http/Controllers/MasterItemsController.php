@@ -16,26 +16,40 @@ class MasterItemsController extends Controller
 
     public function search(Request $request)
     {
-        $kode = $request->kode;
-        $nama = $request->nama;
-        $hargamin = $request->hargamin;
-        $hargamax = $request->hargamax;
-
         $data_search = MasterItem::query();
 
-        if (!empty($kode))
-            $data_search = $data_search->where('kode', $kode);
-        if (!empty($nama))
-            $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
-        if (!empty($hargamin))
-            $data_search = $data_search->where('harga_beli', '>=', $hargamin)->where('harga_beli', '<=', $hargamax);
+        if ($request->filled('kode')) {
+            $data_search->where('kode', $request->kode);
+        }
 
-        $data_search = $data_search->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier', 'foto')->orderBy('id')->get();
+        if ($request->filled('nama')) {
+            $data_search->where('nama', 'LIKE', '%' . $request->nama . '%');
+        }
 
+        $hargamin = $request->filled('hargamin') ? (int) $request->hargamin : null;
+        $hargamax = $request->filled('hargamax') ? (int) $request->hargamax : null;
 
-        return json_encode([
+        // jika terbalik, tukar otomatis
+        if ($hargamin !== null && $hargamax !== null && $hargamin > $hargamax) {
+            [$hargamin, $hargamax] = [$hargamax, $hargamin];
+        }
+
+        if ($hargamin !== null) {
+            $data_search->where('harga_beli', '>=', $hargamin);
+        }
+
+        if ($hargamax !== null) {
+            $data_search->where('harga_beli', '<=', $hargamax);
+        }
+
+        $data = $data_search
+            ->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier', 'foto')
+            ->orderBy('id')
+            ->get();
+
+        return response()->json([
             'status' => 200,
-            'data' => $data_search
+            'data' => $data,
         ]);
     }
 
