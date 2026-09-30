@@ -43,12 +43,26 @@
                                 <td>{{ $data->jenis }}</td>
                             </tr>
                             <tr>
+                                <th>Kategori</th>
+                                <td>:</td>
+                                <td>
+                                    @forelse ($data->kategoris as $kt)
+                                        <a href="{{ url('kategori-items/view/' . $kt->kode) }}"
+                                            class="badge bg-primary text-decoration-none">
+                                            {{ $kt->nama }}
+                                        </a>
+                                    @empty
+                                        <span class="text-muted">Belum ada kategori</span>
+                                    @endforelse
+                                </td>
+                            </tr>
+                            <tr>
                                 <th>Foto</th>
                                 <td>:</td>
                                 <td>
                                     @if ($data->foto)
-                                        <img src="{{ asset('storage/' . $data->foto) }}" width="200" class="img-thumbnail"
-                                            alt="{{ $data->nama }}">
+                                        <img src="{{ asset('storage/' . $data->foto) }}" width="200"
+                                            class="img-thumbnail" alt="{{ $data->nama }}">
                                     @else
                                         <span class="text-muted">Tidak ada foto</span>
                                     @endif

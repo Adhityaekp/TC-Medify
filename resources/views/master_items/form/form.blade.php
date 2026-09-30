@@ -49,6 +49,32 @@
     </div>
 
     <div class="form-group">
+        <label>Kategori</label>
+
+        @php $checked = old('kategori_ids', $selected_kategoris); @endphp
+        <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+            @forelse ($kategoris as $kt)
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="kategori_ids[]" value="{{ $kt->id }}"
+                        id="kategori-{{ $kt->id }}" {{ in_array($kt->id, $checked) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="kategori-{{ $kt->id }}">
+                        {{ $kt->kode }} - {{ $kt->nama }}
+                    </label>
+                </div>
+            @empty
+                <span class="text-muted">
+                    Belum ada kategori. <a href="{{ url('kategori-items/form/new') }}">Buat kategori</a>
+                </span>
+            @endforelse
+        </div>
+        <small class="form-text text-muted">Boleh memilih lebih dari satu kategori.</small>
+
+        @error('kategori_ids.*')
+            <div class="text-danger small">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="form-group">
         <label>Foto</label>
         <input type="file" class="form-control @error('foto') is-invalid @enderror" name="foto" id="foto"
             accept=".jpg,.jpeg,.png">
@@ -72,3 +98,18 @@
     <button class="btn btn-primary mt-3">Submit</button>
 
 </form>
+<script>
+    document.getElementById('foto').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        const allowed = ['image/jpeg', 'image/png'];
+        if (!allowed.includes(file.type)) {
+            alert('Foto harus berformat JPG atau PNG.');
+            this.value = '';
+        } else if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran foto maksimal 2 MB.');
+            this.value = '';
+        }
+    });
+</script>

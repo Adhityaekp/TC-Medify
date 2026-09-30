@@ -6,15 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class MasterItem extends Model
+class KategoriItem extends Model
 {
     use HasFactory;
     use SoftDeletes;
 
-
-    public function kategoris()
+    public function items()
     {
-        return $this->belongsToMany(KategoriItem::class, 'kategori_item_master_item', 'master_item_id', 'kategori_item_id')
+        return $this->belongsToMany(MasterItem::class, 'kategori_item_master_item', 'kategori_item_id', 'master_item_id')
             ->withTimestamps();
     }
 }

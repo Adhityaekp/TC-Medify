@@ -1,16 +1,27 @@
 <div id="filter-container">
     <h4>Filter</h4>
     <div class="row">
-        <div class="col-4">
+        <div class="col-3">
             <div class="form-group">
                 <label>Kode</label>
                 <input type="text" class="form-control" id="filter-kode">
             </div>
         </div>
-        <div class="col-4">
+        <div class="col-3">
             <div class="form-group">
                 <label>Nama</label>
                 <input type="text" class="form-control" id="filter-nama">
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="form-group">
+                <label>Kategori</label>
+                <select class="form-control" id="filter-kategori">
+                    <option value="">Semua</option>
+                    @foreach ($kategoris as $kt)
+                        <option value="{{ $kt->id }}">{{ $kt->nama }}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
         <div class="col-2">

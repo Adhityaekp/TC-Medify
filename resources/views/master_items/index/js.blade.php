@@ -16,7 +16,7 @@
             ],
             columnDefs: [{
                 orderable: false,
-                targets: [1, 7]
+                targets: [1, 4, 8]
             }],
         });
         getData()
@@ -39,6 +39,7 @@
             data: {
                 kode: $('#filter-kode').val(),
                 nama: $('#filter-nama').val(),
+                kategori_id: $('#filter-kategori').val(),
                 hargamin: $('#filter-harga-min').val(),
                 hargamax: $('#filter-harga-max').val()
             },
@@ -47,7 +48,7 @@
 
                 $.each(results.data, function(index, item) {
                     var harga_jual = Math.round(item.harga_beli + item.harga_beli * item.laba /
-                    100);
+                        100);
                     var kode = item.kode;
 
                     var foto = item.foto ?
@@ -58,11 +59,19 @@
                     var html = `<a href="{{ url('master-items/view/') }}/` + kode +
                         `" class="btn btn-primary">View</a>`;
 
+                    var kategori = item.kategoris.length ?
+                        item.kategoris.map(function(k) {
+                            return $('<span class="badge bg-primary me-1"></span>').text(k.nama)
+                                .prop('outerHTML');
+                        }).join('') :
+                        '-';
+
                     rows.push([
                         kode,
                         foto,
                         item.nama,
                         item.jenis,
+                        kategori,
                         item.harga_beli,
                         harga_jual,
                         item.supplier,
@@ -85,18 +94,4 @@
             }
         });
     }
-
-    document.getElementById('foto').addEventListener('change', function() {
-        const file = this.files[0];
-        if (!file) return;
-
-        const allowed = ['image/jpeg', 'image/png'];
-        if (!allowed.includes(file.type)) {
-            alert('Foto harus berformat JPG atau PNG.');
-            this.value = '';
-        } else if (file.size > 2 * 1024 * 1024) {
-            alert('Ukuran foto maksimal 2 MB.');
-            this.value = '';
-        }
-    });
 </script>
